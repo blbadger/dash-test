@@ -20,7 +20,7 @@ with open('data/geojson-counties-fips.json') as response:
 df = pd.read_csv('data/fips-unemp-16.csv', dtype={"fips": str})
 df = pd.DataFrame(df)
 
-app = dash.Dash()
+app = dash.Dash(server=server)
 
 states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'All']
 
@@ -151,9 +151,6 @@ def update_output(value):
     return 'Range selected: {} to {} %'.format(value[0], value[1])
 
 # run the app in the cloud
-server = flask.Flask(__name__)
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], server=server)
-
 if __name__ == '__main__':
 	app.run_server(debug=True)
 
