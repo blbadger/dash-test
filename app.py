@@ -151,6 +151,6 @@ def update_output(value):
     return 'Range selected: {} to {} %'.format(value[0], value[1])
 
 # run the app on a local host
-if __name__ == '__main__':
-	app.run_server(debug=True)
+# if __name__ == '__main__':
+# 	app.run_server(debug=True)
 
