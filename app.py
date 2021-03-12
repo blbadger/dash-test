@@ -9,7 +9,6 @@ import dash_html_components as html
 from urllib.request import urlopen
 from dash.dependencies import Input, Output
 import json
-import pandas as pd
 import plotly.express as px
 
 # import json object for mapping data to US counties, labelled by fips
