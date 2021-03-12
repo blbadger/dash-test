@@ -24,7 +24,7 @@ df = pd.DataFrame(df)
 server = flask.Flask(__name__)
 app = dash.Dash(server=server)
 
-states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'All']
+states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']
 
 colors = {
 	'background': '#D1D0D6',
@@ -102,19 +102,19 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 @app.callback(Output(component_id='choropleth', component_property='figure'), 
 			[Input(component_id='states', component_property='value'),
 			 Input(component_id='range-slider', component_property='value')])
-def display_choropleth(states_value, slider_value, states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'All']):
+def display_choropleth(states_value, slider_value, states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']):
 	# list of coordinates and viewing scales for each possible state
-	coordinates = [[38.9072, -77.0369], [35.5, -79.0193], [41.2033, -77.1945], [36.7783, -119.43], [64.2008, -149.4937], [53.5, -130]]
-	zooms = [8, 6, 6, 4.5, 3, 2]
+	coordinates = [[38.9072, -77.0369], [35.5, -79.0193], [41.2033, -77.1945], [36.7783, -119.43], [64.2008, -149.4937], [34.0489, -111.0937], [32.4487, -99.7331], [53.5, -130]]
+	zooms = [8, 6, 6, 4.5, 3, 5, 4, 2]
 
 	# DC, NC, CA, and AK, respectively
-	state_codes = ['11', '37', '42', '06', '02'] 
+	state_codes = ['11', '37', '42', '06', '02', '04', '48'] 
 
 	for i in range(len(states_list)):
 		if states_list[i] == states_value:
 			pair = coordinates[i]
 			zoom = zooms[i]
-			if i < 5:
+			if i < 7:
 				state_code = state_codes[i]
 			else:
 				state_code = ''
