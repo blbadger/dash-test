@@ -20,7 +20,8 @@ with open('data/geojson-counties-fips.json') as response:
 df = pd.read_csv('data/fips-unemp-16.csv', dtype={"fips": str})
 df = pd.DataFrame(df)
 
-app = dash.Dash(server=server)
+server = flask.Flask(__name__)
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], server=server)
 
 states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'All']
 
