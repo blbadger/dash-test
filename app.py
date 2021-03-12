@@ -9,14 +9,15 @@ import dash_html_components as html
 from urllib.request import urlopen
 from dash.dependencies import Input, Output
 import json
+import pandas as pd
 import plotly.express as px
 
 # import json object for mapping data to US counties, labelled by fips
-with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
+with open('data/geojson-counties-fips.json') as response:
 	counties = json.load(response)
 
 # import unemployment data mapped to county via fips and convert to DataFrame object
-df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/fips-unemp-16.csv", dtype={"fips": str})
+df = pd.read_csv('data/fips-unemp-16.csv', dtype={"fips": str})
 df = pd.DataFrame(df)
 
 app = dash.Dash()
