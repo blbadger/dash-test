@@ -97,60 +97,60 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 ])
 
 # responsive
-@app.callback(Output(component_id='choropleth', component_property='figure'), 
-			[Input(component_id='states', component_property='value'),
-			 Input(component_id='range-slider', component_property='value')])
-def display_choropleth(states_value, slider_value, states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'All']):
-	# list of coordinates and viewing scales for each possible state
-	coordinates = [[38.9072, -77.0369], [35.5, -79.0193], [41.2033, -77.1945], [36.7783, -119.43], [64.2008, -149.4937], [53.5, -130]]
-	zooms = [8, 6, 6, 4.5, 3, 2]
+# @app.callback(Output(component_id='choropleth', component_property='figure'), 
+# 			[Input(component_id='states', component_property='value'),
+# 			 Input(component_id='range-slider', component_property='value')])
+# def display_choropleth(states_value, slider_value, states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'All']):
+# 	# list of coordinates and viewing scales for each possible state
+# 	coordinates = [[38.9072, -77.0369], [35.5, -79.0193], [41.2033, -77.1945], [36.7783, -119.43], [64.2008, -149.4937], [53.5, -130]]
+# 	zooms = [8, 6, 6, 4.5, 3, 2]
 
-	# DC, NC, CA, and AK, respectively
-	state_codes = ['11', '37', '42', '06', '02'] 
+# 	# DC, NC, CA, and AK, respectively
+# 	state_codes = ['11', '37', '42', '06', '02'] 
 
-	for i in range(len(states_list)):
-		if states_list[i] == states_value:
-			pair = coordinates[i]
-			zoom = zooms[i]
-			if i < 5:
-				state_code = state_codes[i]
-			else:
-				state_code = ''
+# 	for i in range(len(states_list)):
+# 		if states_list[i] == states_value:
+# 			pair = coordinates[i]
+# 			zoom = zooms[i]
+# 			if i < 5:
+# 				state_code = state_codes[i]
+# 			else:
+# 				state_code = ''
 
-	state_df = df[df['fips'].str.match(state_code)] # matches to all entries in df with fips[0:2] == predicate
+# 	state_df = df[df['fips'].str.match(state_code)] # matches to all entries in df with fips[0:2] == predicate
 
-	## if the initial range is desired to be set to min-max employment rates
+# 	## if the initial range is desired to be set to min-max employment rates
 
-	# unemp_rates = state_df['unemp']
-	# ls = []
-	# for item in range(len(unemp_rates)):
-	# 	ls.append(unemp_rates[item])
+# 	# unemp_rates = state_df['unemp']
+# 	# ls = []
+# 	# for item in range(len(unemp_rates)):
+# 	# 	ls.append(unemp_rates[item])
 
-	# ls.sort()
-	# smallest = ls[0]
-	# largest = ls[-1]
+# 	# ls.sort()
+# 	# smallest = ls[0]
+# 	# largest = ls[-1]
 
-	# Make the figure with responsive range_color and zoom args
-	fig = px.choropleth_mapbox(state_df, geojson=counties, locations='fips', color='unemp',
-						   color_continuous_scale="Viridis",
-						   range_color=(slider_value[0], slider_value[1]),
-						   mapbox_style="carto-positron",
-						   zoom=zoom, center = {"lat": pair[0], "lon": pair[1]},
-						   opacity=0.3,
-						   labels={'unemp':'unemployment rate'}
-						  )
+# 	# Make the figure with responsive range_color and zoom args
+# 	fig = px.choropleth_mapbox(state_df, geojson=counties, locations='fips', color='unemp',
+# 						   color_continuous_scale="Viridis",
+# 						   range_color=(slider_value[0], slider_value[1]),
+# 						   mapbox_style="carto-positron",
+# 						   zoom=zoom, center = {"lat": pair[0], "lon": pair[1]},
+# 						   opacity=0.3,
+# 						   labels={'unemp':'unemployment rate'}
+# 						  )
 
-	fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-	return fig
+# 	fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+# 	return fig
 
-# percentage range slider label output
-@app.callback(
-    dash.dependencies.Output('output-container-range-slider', 'children'),
-    [dash.dependencies.Input('range-slider', 'value')])
-def update_output(value):
-    return 'Range selected: {} to {} %'.format(value[0], value[1])
+# # percentage range slider label output
+# @app.callback(
+#     dash.dependencies.Output('output-container-range-slider', 'children'),
+#     [dash.dependencies.Input('range-slider', 'value')])
+# def update_output(value):
+#     return 'Range selected: {} to {} %'.format(value[0], value[1])
 
 # run the app on a local host
-# if __name__ == '__main__':
-# 	app.run_server(debug=True)
+if __name__ == '__main__':
+	app.run_server(debug=True)
 
