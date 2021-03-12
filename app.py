@@ -11,6 +11,7 @@ from dash.dependencies import Input, Output
 import json
 import pandas as pd
 import plotly.express as px
+import flask
 
 # import json object for mapping data to US counties, labelled by fips
 with open('data/geojson-counties-fips.json') as response:
