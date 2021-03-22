@@ -62,7 +62,10 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 		'color': colors['text']
 	}),
 
-	dcc.Graph(id='choropleth'),
+	dcc.Graph(id='choropleth', 
+		style={
+			'height': '80vh'
+		}),
 
 	dcc.RangeSlider(
         id='range-slider',
@@ -79,11 +82,19 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
         }
     ),
 
-    html.Div(id='output-container-range-slider'),
+    html.Div(id='output-container-range-slider', 
+    	style={
+    		'textAlign': 'center',
+    		'font-family': 'sans-serif', 
+    		'font-weight': 'bold'
+    	}),
 
     html.Br(),
 
-	html.Label('Select State: '),
+	html.Label('Select State: ', 
+		style={
+			'font-weight': 'bold'
+		}),
 
 	dcc.RadioItems(
 		id='states', 
