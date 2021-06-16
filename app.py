@@ -23,7 +23,7 @@ df = pd.read_csv('data/fips-unemp-16.csv', dtype={"fips": str})
 df = pd.DataFrame(df)
 
 server = flask.Flask(__name__)
-app = dash.Dash(server=server)
+app = dash.Dash(server=server, title='Choropleth dash test')
 
 states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']
 
