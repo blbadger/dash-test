@@ -1,6 +1,6 @@
 #! python3 dash_test.py
 ## Tests choropleth dashboarding with python dash using plotly
-# Very good detail but slower response time (~5s per state input)
+# Modified for faster response time (originally ~7s per input)
 
 # import libraries
 import dash
@@ -11,6 +11,7 @@ from dash.dependencies import Input, Output
 import json
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import flask
 
 # import json object for mapping data to US counties, labelled by fips
@@ -30,6 +31,49 @@ colors = {
 	'background': '#D1D0D6',
 	'text': '#10110'
 }
+
+# data processing switched to back-end for faster user response
+coordinates = [[38.9072, -77.0369], 
+				[35.5, -79.0193], 
+				[41.2033, -77.1945], 
+				[36.7783, -119.43], 
+				[64.2008, -149.4937], 
+				[34.0489, -111.0937], 
+				[32.4487, -99.7331], 
+				[53.5, -130]]
+
+zooms = [8, 6, 6, 4.5, 3, 5, 4.5, 2]
+
+state_codes = ['11', '37', '42', '06', '02', '04', '48'] 
+states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']
+data_dict = {}
+
+# assemble data_dict of figure data for each state of interest
+for i in range(len(states_list)):
+	pair = coordinates[i]
+	zoom = zooms[i]
+	if i < len(states_list) - 1:
+		state_code = state_codes[i]
+	else:
+		state_code = ''
+
+	 # matches to all entries in df with fips[0:2]
+	state_df = df[df['fips'].str.match(state_code)]
+	fig = go.Figure(go.Choroplethmapbox(geojson=counties, locations=state_df.fips, z=state_df.unemp,
+						   colorscale="Viridis",
+						   marker_opacity=0.5,
+						   marker_line_width=0,
+						   zmin=0,
+						   zmax=12
+						   # labels={'unemp':'unemployment rate'},
+						  ))
+
+	fig.update_layout(mapbox_zoom=zoom, 
+					  mapbox_center = {"lat": pair[0], "lon": pair[1]},
+					  mapbox_style="carto-positron",
+					  margin={"r":0,"t":0,"l":0,"b":0}
+				)
+	data_dict[states_list[i]] = fig
 
 markdown_text = '''
 
@@ -101,7 +145,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 		options=[{'value': x, 'label': x} 
 				 for x in states_list],
 		value=states_list[-1],
-		labelStyle={'display': 'inline-block'}
+		style={'display': 'inline-block',
+				'width': '30vw'}
 	),
 
 	html.Div([
@@ -109,51 +154,19 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 	])
 ])
 
-# responsive
+# responsive callbacks
 @app.callback(Output(component_id='choropleth', component_property='figure'), 
 			[Input(component_id='states', component_property='value'),
 			 Input(component_id='range-slider', component_property='value')])
 def display_choropleth(states_value, slider_value, states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']):
-	# list of coordinates and viewing scales for each possible state
-	coordinates = [[38.9072, -77.0369], [35.5, -79.0193], [41.2033, -77.1945], [36.7783, -119.43], [64.2008, -149.4937], [34.0489, -111.0937], [32.4487, -99.7331], [53.5, -130]]
-	zooms = [8, 6, 6, 4.5, 3, 5, 4, 2]
+	# lookup from data_dict
+	fig = data_dict[states_value]
 
-	# DC, NC, CA, and AK, respectively
-	state_codes = ['11', '37', '42', '06', '02', '04', '48'] 
+	fig.update_traces(
+		zmin=slider_value[0],
+		zmax=slider_value[1]
+		)
 
-	for i in range(len(states_list)):
-		if states_list[i] == states_value:
-			pair = coordinates[i]
-			zoom = zooms[i]
-			if i < 7:
-				state_code = state_codes[i]
-			else:
-				state_code = ''
-
-	state_df = df[df['fips'].str.match(state_code)] # matches to all entries in df with fips[0:2] == predicate
-
-	## if the initial range is desired to be set to min-max employment rates
-
-	# unemp_rates = state_df['unemp']
-	# ls = []
-	# for item in range(len(unemp_rates)):
-	# 	ls.append(unemp_rates[item])
-
-	# ls.sort()
-	# smallest = ls[0]
-	# largest = ls[-1]
-
-	# Make the figure with responsive range_color and zoom args
-	fig = px.choropleth_mapbox(state_df, geojson=counties, locations='fips', color='unemp',
-						   color_continuous_scale="Viridis",
-						   range_color=(slider_value[0], slider_value[1]),
-						   mapbox_style="carto-positron",
-						   zoom=zoom, center = {"lat": pair[0], "lon": pair[1]},
-						   opacity=0.3,
-						   labels={'unemp':'unemployment rate'}
-						  )
-
-	fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 	return fig
 
 # percentage range slider label output
@@ -165,5 +178,5 @@ def update_output(value):
 
 # run the app in the cloud
 if __name__ == '__main__':
-	app.run_server(debug=True)
+	app.run_server(debug=True, host='0.0.0.0')
 
