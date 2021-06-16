@@ -14,6 +14,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import flask
 
+server = flask.Flask(__name__)
+app = dash.Dash(server=server, title='Choropleth dash test')
+
 # import json object for mapping data to US counties, labelled by fips
 with open('data/geojson-counties-fips.json') as response:
 	counties = json.load(response)
@@ -21,9 +24,6 @@ with open('data/geojson-counties-fips.json') as response:
 # import unemployment data mapped to county via fips and convert to DataFrame object
 df = pd.read_csv('data/fips-unemp-16.csv', dtype={"fips": str})
 df = pd.DataFrame(df)
-
-server = flask.Flask(__name__)
-app = dash.Dash(server=server, title='Choropleth dash test')
 
 states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']
 
