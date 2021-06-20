@@ -1,4 +1,4 @@
-#! python3 dash_test.py
+#! python3 app.py
 ## Tests choropleth dashboarding with python dash using plotly
 # Modified for faster response time (originally ~7s per input)
 
@@ -6,7 +6,6 @@
 import dash
 import dash_core_components as dcc 
 import dash_html_components as html 
-from urllib.request import urlopen
 from dash.dependencies import Input, Output
 import json
 import pandas as pd
@@ -46,40 +45,15 @@ zooms = [8, 6, 6, 4.5, 3, 5, 4.5, 2]
 
 state_codes = ['11', '37', '42', '06', '02', '04', '48'] 
 states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']
-data_dict = {}
 
-# assemble data_dict of figure data for each state of interest
-for i in range(len(states_list)):
-	pair = coordinates[i]
-	zoom = zooms[i]
-	if i < len(states_list) - 1:
-		state_code = state_codes[i]
-	else:
-		state_code = ''
-
-	 # matches to all entries in df with fips[0:2]
-	state_df = df[df['fips'].str.match(state_code)]
-	fig = go.Figure(go.Choroplethmapbox(geojson=counties, locations=state_df.fips, z=state_df.unemp,
-						   colorscale="Viridis",
-						   marker_opacity=0.5,
-						   marker_line_width=0,
-						   zmin=0,
-						   zmax=12
-						   # labels={'unemp':'unemployment rate'},
-						  ))
-
-	fig.update_layout(mapbox_zoom=zoom, 
-					  mapbox_center = {"lat": pair[0], "lon": pair[1]},
-					  mapbox_style="carto-positron",
-					  margin={"r":0,"t":0,"l":0,"b":0}
-				)
-	data_dict[states_list[i]] = fig
+mapstyles = ["open-street-map", "carto-positron", "carto-darkmatter", "stamen-terrain", "stamen-toner", "stamen-watercolor"]
 
 markdown_text = '''
 
 ### Test for markdown features
 
 *Markdown* is useful to write 
+
 
 ```
 # code
@@ -97,13 +71,16 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 		children='Dash Test in Development',
 		style={
 			'textAlign': 'center',
-			'color': colors['text']
+			'color': colors['text'],
+			'margin-top': '1vh'
 		}
 
 	),
 	html.Div(children='Choropleth plot for employment in counties with state and range choice', style={
 		'textAlign': 'center',
-		'color': colors['text']
+		'color': colors['text'],
+		'margin-bottom': '1vh', 
+		'margin-top': '1vh'
 	}),
 
 	dcc.Graph(id='choropleth', 
@@ -144,23 +121,70 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 		id='states', 
 		options=[{'value': x, 'label': x} 
 				 for x in states_list],
+		labelStyle={'margin-left': '0.5vw'},
 		value=states_list[-1],
 		style={'display': 'inline-block',
-				'width': '30vw'}
+				'width': '35vw',
+				'margin-bottom': '5vh'}
 	),
 
+	html.Div(
+		children=[
+		html.Label('Select map style: ',
+			style={'font-weight': 'bold',
+			'display':'inline-block'}),
+		dcc.Dropdown(
+				id='mapstyle',
+				options=[{'value': x, 'label': x} 
+						 for x in mapstyles],
+				value='carto-positron',
+				style={
+					'width': '12vw'}
+		)],
+		style={'display': 'inline-block',
+				'margin-left': '29vw',
+				}
+		),
+
+
 	html.Div([
-	dcc.Markdown(children=markdown_text)
+	dcc.Markdown(children=markdown_text, style={
+		'margin-top': '5vh'
+		})
 	])
 ])
 
 # responsive callbacks
 @app.callback(Output(component_id='choropleth', component_property='figure'), 
 			[Input(component_id='states', component_property='value'),
-			 Input(component_id='range-slider', component_property='value')])
-def display_choropleth(states_value, slider_value, states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']):
-	# lookup from data_dict
-	fig = data_dict[states_value]
+			 Input(component_id='range-slider', component_property='value'),
+			 Input(component_id='mapstyle', component_property='value')])
+def display_choropleth(states_value, slider_value, mapstyle_value):
+	i = states_list.index(states_value)
+	pair = coordinates[i]
+	zoom = zooms[i]
+	if i < len(states_list) - 1:
+		state_code = state_codes[i]
+	else:
+		state_code = ''
+
+	 # matches to all entries in df with fips[0:2]
+	state_df = df[df['fips'].str.match(state_code)]
+
+	fig = go.Figure(go.Choroplethmapbox(geojson=counties, locations=state_df.fips, z=state_df.unemp,
+						   colorscale="Viridis",
+						   marker_opacity=0.5,
+						   marker_line_width=0,
+						   zmin=0,
+						   zmax=12
+						   # labels={'unemp':'unemployment rate'},
+						  ))
+
+	fig.update_layout(mapbox_zoom=zoom, 
+					  mapbox_center = {"lat": pair[0], "lon": pair[1]},
+					  mapbox_style=mapstyle_value,
+					  margin={"r":0,"t":0,"l":0,"b":0}
+				)
 
 	fig.update_traces(
 		zmin=slider_value[0],
