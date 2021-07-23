@@ -13,8 +13,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import flask
 
-server = flask.Flask(__name__)
-app = dash.Dash(server=server, title='Choropleth dash test')
+dash_app = dash.Dash(title='Choropleth dash test')
+app = dash_app.server
 
 # import json object for mapping data to US counties, labelled by fips
 with open('data/geojson-counties-fips.json') as response:
@@ -200,7 +200,6 @@ def display_choropleth(states_value, slider_value, mapstyle_value):
 def update_output(value):
     return 'Range selected: {} to {} %'.format(value[0], value[1])
 
-# run the app in the cloud
+# for running on azure
 if __name__ == '__main__':
-	app.run_server(debug=True, host='0.0.0.0')
-
+    dash_app.run_server(debug=True)
