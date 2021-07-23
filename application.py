@@ -66,7 +66,7 @@ as well as other text
 '''
 
 # page layout and inputs specified
-app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-family': 'sans-serif'}, children=[
+dash_app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-family': 'sans-serif'}, children=[
 	html.H1(
 		children='Dash Test in Development',
 		style={
@@ -155,7 +155,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-fami
 ])
 
 # responsive callbacks
-@app.callback(Output(component_id='choropleth', component_property='figure'), 
+@dash_app.callback(Output(component_id='choropleth', component_property='figure'), 
 			[Input(component_id='states', component_property='value'),
 			 Input(component_id='range-slider', component_property='value'),
 			 Input(component_id='mapstyle', component_property='value')])
@@ -194,7 +194,7 @@ def display_choropleth(states_value, slider_value, mapstyle_value):
 	return fig
 
 # percentage range slider label output
-@app.callback(
+@dash_app.callback(
     dash.dependencies.Output('output-container-range-slider', 'children'),
     [dash.dependencies.Input('range-slider', 'value')])
 def update_output(value):
