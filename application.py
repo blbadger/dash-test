@@ -199,5 +199,6 @@ def update_output(value):
 
 # for running on azure
 if __name__ == '__main__':
-	dash_app.run_server(debug=True, port=8022)
-    # dash_app.run_server(debug=True)
+	# for testing
+	# dash_app.run_server(debug=True, port=8022)
+    dash_app.run_server(debug=True)
