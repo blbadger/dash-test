@@ -13,7 +13,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import flask
 
+
 dash_app = dash.Dash(title='Choropleth dash test')
+# app has to be callable
 app = dash_app.server
 
 # import json object for mapping data to US counties, labelled by fips
@@ -21,7 +23,7 @@ with open('data/geojson-counties-fips.json') as response:
 	counties = json.load(response)
 
 # import unemployment data mapped to county via fips and convert to DataFrame object
-df = pd.read_csv('data/fips-unemp-16.csv', dtype={"fips": str})
+df = pd.read_excel('data/extended_fips.xlsx', dtype={"fips": str})
 df = pd.DataFrame(df)
 
 states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']
@@ -48,44 +50,60 @@ states_list = ['DC', 'NC', 'PA', 'CA', 'AK', 'AZ', 'TX', 'All']
 
 mapstyles = ["open-street-map", "carto-positron", "carto-darkmatter", "stamen-terrain", "stamen-toner", "stamen-watercolor"]
 
-markdown_text = '''
-
-### Test for markdown features
-
-*Markdown* is useful to write 
-
-
-```
-# code
-def function(args, **kwargs):
-	return 0 ** 1
-``` 
-
-as well as other text
-
-'''
 
 # page layout and inputs specified
 dash_app.layout = html.Div(style={'backgroundColor': colors['background'], 'font-family': 'sans-serif'}, children=[
-	html.H1(
-		children='Dash Test in Development',
-		style={
-			'textAlign': 'center',
-			'color': colors['text'],
-			'margin-top': '1vh'
-		}
+	html.Div(children=[
+			html.H1(
+				children='Dash Test in Development',
+				style={
+					'textAlign': 'left',
+					'color': colors['text'],
+					'margin-top': '0vh',
+					'margin-left': '5vw',
+					'width': '30vw'
+				}
 
+			),
+			html.Div(children='Choropleth plot for employment in counties with range, state, and map choice', style={
+				'textAlign': 'left',
+				'color': colors['text'],
+				'margin-bottom': '1vh', 
+				'margin-top': '1vh',
+				'margin-left': '3vw',
+			})
+		], 
+		style={
+		'backgroundColor': colors['background'],
+		'font-family': 'sans-serif',
+		'display': 'inline-block',
+		'margin-left': '17vw'
+		}
 	),
-	html.Div(children='Choropleth plot for employment in counties with state and range choice', style={
-		'textAlign': 'center',
-		'color': colors['text'],
-		'margin-bottom': '1vh', 
-		'margin-top': '1vh'
-	}),
+
+	html.Div(
+		children=[
+		html.Label('Select map style: ',
+			style={'font-weight': 'bold',
+			'display':'inline-block'}),
+		dcc.Dropdown(
+				id='mapstyle',
+				options=[{'value': x, 'label': x} 
+						 for x in mapstyles],
+				value='carto-positron',
+				style={
+					'width': '12vw'}
+		)],
+		style={'display': 'inline-block',
+				'margin-left': '5vw',
+				'vertical-align': 'top',
+				'padding-top': '1vh'
+				}
+		),
 
 	dcc.Graph(id='choropleth', 
 		style={
-			'height': '80vh'
+			'height': '90vh'
 		}),
 
 	dcc.RangeSlider(
@@ -114,7 +132,8 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background'], 'font
 
 	html.Label('Select State: ', 
 		style={
-			'font-weight': 'bold'
+			'font-weight': 'bold',
+			'margin-left': '2vw'
 		}),
 
 	dcc.RadioItems(
@@ -126,32 +145,8 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background'], 'font
 		style={'display': 'inline-block',
 				'width': '35vw',
 				'margin-bottom': '5vh'}
-	),
+	)
 
-	html.Div(
-		children=[
-		html.Label('Select map style: ',
-			style={'font-weight': 'bold',
-			'display':'inline-block'}),
-		dcc.Dropdown(
-				id='mapstyle',
-				options=[{'value': x, 'label': x} 
-						 for x in mapstyles],
-				value='carto-positron',
-				style={
-					'width': '12vw'}
-		)],
-		style={'display': 'inline-block',
-				'margin-left': '29vw',
-				}
-		),
-
-
-	html.Div([
-	dcc.Markdown(children=markdown_text, style={
-		'margin-top': '5vh'
-		})
-	])
 ])
 
 # responsive callbacks
@@ -176,14 +171,16 @@ def display_choropleth(states_value, slider_value, mapstyle_value):
 						   marker_opacity=0.5,
 						   marker_line_width=0,
 						   zmin=0,
-						   zmax=12
-						   # labels={'unemp':'unemployment rate'},
+						   zmax=12,
+						   colorbar_title= "% Unemp.",
+						   text=state_df['cname']
 						  ))
 
 	fig.update_layout(mapbox_zoom=zoom, 
 					  mapbox_center = {"lat": pair[0], "lon": pair[1]},
 					  mapbox_style=mapstyle_value,
-					  margin={"r":0,"t":0,"l":0,"b":0}
+					  margin={"r":0,"t":0,"l":0,"b":0},
+					  plot_bgcolor='rgba(0,0,0,0)'
 				)
 
 	fig.update_traces(
@@ -202,4 +199,5 @@ def update_output(value):
 
 # for running on azure
 if __name__ == '__main__':
-    dash_app.run_server(debug=True)
+	dash_app.run_server(debug=True, port=8022)
+    # dash_app.run_server(debug=True)
